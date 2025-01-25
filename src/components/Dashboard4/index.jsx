@@ -105,6 +105,9 @@ function Dashboard4() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Process API data when it's received
+  // ... existing code ...
+
+  // Process API data when it's received
   useEffect(() => {
     if (apiData) {
       const processedData = apiData.map((item, index) => ({
@@ -113,30 +116,51 @@ function Dashboard4() {
         id: index + 1
       }));
 
+      // Filter out invalid values when setting dropdown options
+      setBrands(['all', ...new Set(processedData
+        .map(item => item.brand)
+        .filter(brand => brand && brand !== 'Very Negative')
+      )].filter(Boolean));
+
+      setFacts(['all', ...new Set(processedData
+        .map(item => item.fact)
+        .filter(fact => fact && fact !== '0')
+      )].filter(Boolean));
+
+      setSources(['all', ...new Set(processedData
+        .map(item => item.source)
+        .filter(source => source && source !== '1500000')
+      )].filter(Boolean));
+
       const uniqueCountries = [...new Set(processedData.map(item => item.country))].filter(Boolean);
       setCountries(['all', ...uniqueCountries]);
-
-
-      // Set dropdown options from API data with "All" option
-      setBrands(['all', ...new Set(processedData.map(item => item.brand))].filter(Boolean));
-      setFacts(['all', ...new Set(processedData.map(item => item.fact))].filter(Boolean));
-    
-      setSources(['all', ...new Set(processedData.map(item => item.source))].filter(Boolean));
       
       // Initialize models based on selected brands
       updateModels(processedData, ['all']);
     }
   }, [apiData]);
 
-  // Function to update models based on selected brands
-  const updateModels = (data, brands) => {
-    if (brands.includes('all')) {
-      setModels(['all', ...new Set(data.map(item => item.model))].filter(Boolean));
-    } else {
-      setModels(['all', ...new Set(data.filter(item => brands.includes(item.brand)).map(item => item.model))].filter(Boolean));
-    }
-    setSelectedModels(['all']); // Reset model selection when brands change
-  };
+  // Update the updateModels function to also filter invalid values
+// ... existing code ...
+
+const updateModels = (data, brands) => {
+  if (brands.includes('all')) {
+    setModels(['all', ...new Set(data
+      .map(item => item.model)
+      .filter(model => model && model !== 'Climate Control')
+    )]);
+  } else {
+    setModels(['all', ...new Set(data
+      .filter(item => brands.includes(item.brand))
+      .map(item => item.model)
+      .filter(model => model && model !== 'Climate Control')
+    )]);
+  }
+  setSelectedModels(['all']); // Reset model selection when brands change
+};
+
+// ... existing code ...
+
 
   // Handle brand change
   const handleBrandChange = (event) => {

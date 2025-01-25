@@ -53,21 +53,38 @@ export function AppProvider({ children }) {
     }
   }, [filters, rawData]);
 
-  const getUniqueValues = (field) => {
-    if (!rawData) return ['All'];
-    
-    const values = new Set(
-      rawData
-        .map(item => item[field])
-        .filter(Boolean)
-        .map(value => 
-          typeof value === 'string' 
-            ? value.trim()
-            : value
-        )
-    );
-    return ['All', ...Array.from(values).sort()];
-  };
+// ... existing code ...
+
+const getUniqueValues = (field) => {
+  if (!rawData) return ['All'];
+  
+  const values = new Set(
+    rawData
+      .map(item => item[field])
+      .filter(Boolean)
+      .filter(value => {
+        // Filter out specific invalid values based on field
+        switch(field) {
+          case 'brand':
+            return value !== 'Very Negative';
+          case 'Feature':
+            return value !== '0';
+          case 'source':
+            return value !== '1500000';
+          default:
+            return true;
+        }
+      })
+      .map(value => 
+        typeof value === 'string' 
+          ? value.trim()
+          : value
+      )
+  );
+  return ['All', ...Array.from(values).sort()];
+};
+
+// ... existing code ...
 
   const getModelsByBrand = (selectedBrands) => {
     if (!rawData || selectedBrands.includes('All')) {
@@ -101,7 +118,6 @@ export function AppProvider({ children }) {
         );
         if (!itemPasses) return false;
       }
-
       // Brand filter
       if (itemPasses && !filters.brands.includes('All')) {
         itemPasses = filters.brands.some(brand => 
