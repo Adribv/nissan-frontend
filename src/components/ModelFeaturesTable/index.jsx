@@ -22,6 +22,12 @@ function ModelFeaturesTable() {
     }
   
     let processedData = [...data];
+
+    processedData = processedData.filter(item => 
+      item.model && 
+      item.model !== 'Unknown' && 
+      item.model !== 'Climate Control'
+    );
   
     // Apply filters (brand, model, etc.) if needed
     if (filters?.brands?.length && !filters.brands.includes('All')) {

@@ -11,7 +11,7 @@ const BackgroundContainer = styled(Box)({
   background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
                url('https://i.ibb.co/5RHTzxx/Screenshot-2024-06-25-185451.png')`,
   backgroundSize: 'cover',
-  backgroundPosition: 'center',
+  backgroundPosition: 'center 80px',
 });
 
 const NavContainer = styled(Box)({

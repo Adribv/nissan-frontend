@@ -42,26 +42,68 @@ function Dashboard2() {
     endDate: null
   });
 
-  // Extract unique values for dropdowns
-  const brands = [...new Set(data?.map(item => item.brand))].filter(Boolean);
+  // Extract unique values for dropdowns with filtering
+  const brands = [...new Set(data?.map(item => item.brand))]
+    .filter(Boolean)  // Remove null/undefined
+    .filter(brand => 
+      // Filter out sentiment values and ensure it's a valid brand
+      !['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive'].includes(brand)
+    )
+    .sort();  // Sort alphabetically
+
   const models = useMemo(() => {
     if (!data) return [];
     
+    let filteredModels;
     // If no brand is selected or 'All' is selected, show all models
     if (!filters.brand.length || filters.brand.includes('All')) {
-      return [...new Set(data.map(item => item.model))].filter(Boolean);
+      filteredModels = [...new Set(data.map(item => item.model))];
+    } else {
+      // Otherwise, filter models based on selected brands
+      filteredModels = [...new Set(
+        data
+          .filter(item => filters.brand.includes(item.brand))
+          .map(item => item.model)
+      )];
     }
-    
-    // Otherwise, filter models based on selected brands
-    return [...new Set(
-      data
-        .filter(item => filters.brand.includes(item.brand))
-        .map(item => item.model)
-    )].filter(Boolean);
+
+    return filteredModels
+      .filter(Boolean)  // Remove null/undefined
+      .filter(model => 
+        // Filter out unwanted values
+        typeof model === 'string' && 
+        !model.includes('Climate Control') &&
+        !['0', '1', '2', '3', '4', '5'].includes(model)
+      )
+      .sort();  // Sort alphabetically
   }, [data, filters.brand]);
-  const facts = [...new Set(data?.map(item => item.fact))].filter(Boolean);
-  const countries = [...new Set(data?.map(item => item.country))].filter(Boolean);
-  const sources = [...new Set(data?.map(item => item.source))].filter(Boolean);
+
+  const facts = [...new Set(data?.map(item => item.fact))]
+    .filter(Boolean)  // Remove null/undefined
+    .filter(fact => 
+      // Filter out numeric values and ensure it's a valid fact
+      typeof fact === 'string' && 
+      !['0', '1', '2', '3', '4', '5'].includes(fact)
+    )
+    .sort();  // Sort alphabetically
+
+  
+    const countries = useMemo(() => {
+      if (!data) return [];
+      
+      const uniqueCountries = [...new Set(data.map(item => item.country))].filter(Boolean);
+      return ['All', ...uniqueCountries];
+    }, [data]); // Sort alphabetically
+
+  const sources = [...new Set(data?.map(item => item.source))]
+    .filter(Boolean)  // Remove null/undefined
+    .filter(source => 
+      // Filter out numeric values and ensure it's a valid source
+      typeof source === 'string' && 
+      !['0', '1500000', '2000000'].includes(source) &&
+      isNaN(Number(source))  // Filter out any numeric strings
+    )
+    .sort();  // Sort alphabetically
 
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => {
@@ -164,12 +206,12 @@ function Dashboard2() {
                 options={facts}
                 onChange={(value) => handleFilterChange('fact', value)}
               />
-              <FilterDropdown
-                label="Country"
-                value={filters.country}
-                options={countries}
-                onChange={(value) => handleFilterChange('country', value)}
-              />
+            <FilterDropdown
+  label="Country"
+  value={filters.country}
+  options={countries.filter(country => country !== 'All')} // Remove 'All' from options since it's handled in MenuItem
+  onChange={(value) => handleFilterChange('country', value)}
+/>
               <FilterDropdown
                 label="Source"
                 value={filters.source}
